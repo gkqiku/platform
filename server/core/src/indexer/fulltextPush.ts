@@ -28,6 +28,7 @@ import core, {
   type ServerStorage,
   type WorkspaceId
 } from '@hcengineering/core'
+import { jsonToText, markupToJSON } from '@hcengineering/text'
 import { type DbAdapter } from '../adapter'
 import { updateDocWithPresenter } from '../mapper'
 import { type FullTextAdapter, type IndexedDoc } from '../types'
@@ -258,6 +259,10 @@ function updateDoc2Elastic (
     }
 
     let vv: any = v
+    if (vv != null && extra.includes('base64')) {
+      vv = Buffer.from(v, 'base64').toString()
+    }
+
     try {
       const attribute = hierarchy?.getAttribute(_class ?? doc._class[0], attr)
       if (attribute !== undefined && vv != null) {
@@ -270,17 +275,17 @@ function updateDoc2Elastic (
                 (attribute.type as ArrOf<any>).of._class === core.class.RefTo)
             ))
         ) {
-          if (!(doc.fulltextSummary ?? '').includes(vv)) {
-            doc.fulltextSummary = (doc.fulltextSummary ?? '') + vv + '\n'
+          let vvv = vv
+          if (attribute.type._class === core.class.TypeMarkup || attribute.type._class === core.class.TypeCollaborativeMarkup) {
+            vvv = jsonToText(markupToJSON(vv))
+          }
+          if (!(doc.fulltextSummary ?? '').includes(vvv)) {
+            doc.fulltextSummary = (doc.fulltextSummary ?? '') + vvv + '\n'
             continue
           }
         }
       }
     } catch (e) {}
-
-    if (vv != null && extra.includes('base64')) {
-      vv = Buffer.from(v, 'base64').toString()
-    }
 
     docId = docIdOverride ?? docId
     if (docId === undefined) {
