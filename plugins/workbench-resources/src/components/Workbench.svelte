@@ -20,7 +20,14 @@
   import notification, { DocNotifyContext, InboxNotification, notificationId } from '@hcengineering/notification'
   import { BrowserNotificatator, InboxNotificationsClientImpl } from '@hcengineering/notification-resources'
   import { IntlString, broadcastEvent, getMetadata, getResource } from '@hcengineering/platform'
-  import { ActionContext, ComponentExtensions, createQuery, getClient, isAdminUser } from '@hcengineering/presentation'
+  import {
+    ActionContext,
+    ComponentExtensions,
+    createQuery,
+    getClient,
+    isAdminUser,
+    reducedOperations
+  } from '@hcengineering/presentation'
   import setting from '@hcengineering/setting'
   import support, { SupportStatus, supportLink } from '@hcengineering/support'
   import {
@@ -166,11 +173,11 @@
   let syncPromise: Promise<void> | undefined = undefined
   let locUpdate = 0
 
-  getResource(notification.function.HasInboxNotifications).then((f) => {
+  void getResource(notification.function.HasInboxNotifications).then((f) => {
     hasNotificationsFn = f
   })
 
-  $: hasNotificationsFn?.($inboxNotificationsByContextStore).then((res) => {
+  $: void hasNotificationsFn?.($inboxNotificationsByContextStore).then((res) => {
     hasInboxNotifications = res
   })
 
